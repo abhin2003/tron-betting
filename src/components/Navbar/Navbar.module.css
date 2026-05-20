@@ -1,0 +1,95 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: #0d0d0d;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #FF2D2D;
+  letter-spacing: 1px;
+}
+
+.walletSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.errorText {
+  color: #FF4444;
+  font-size: 0.875rem;
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .errorText {
+    display: block;
+  }
+}
+
+.connectBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border: 1px solid #2a2a2a;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.connectBtn:hover:not(.connected) {
+  border-color: #FF2D2D;
+  background-color: rgba(255, 45, 45, 0.1);
+}
+
+.connectBtn.connected {
+  cursor: default;
+  background-color: #141414;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dotRed {
+  background-color: #FF4444;
+  box-shadow: 0 0 4px #FF4444;
+}
+
+.dotGreen {
+  background-color: #00C851;
+  box-shadow: 0 0 4px #00C851;
+}
+
+.warningBanner {
+  background-color: #FFB300;
+  color: #000;
+  text-align: center;
+  padding: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 12px 16px;
+  }
+  .logo {
+    font-size: 1.2rem;
+  }
+  .connectBtn {
+    padding: 6px 12px;
+  }
+}

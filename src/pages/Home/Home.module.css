@@ -1,0 +1,9 @@
+.main {
+  min-height: calc(100vh - 120px);
+  padding: 16px;
+}
+
+.betSection {
+  max-width: 600px;
+  margin: 32px auto;
+}

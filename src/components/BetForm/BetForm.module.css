@@ -1,0 +1,201 @@
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 32px;
+}
+
+.cards {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.card {
+  flex: 1;
+  background-color: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.card:hover {
+  opacity: 0.8;
+}
+
+.card.selected {
+  opacity: 1;
+  border-color: #FF2D2D;
+  background-color: rgba(255, 45, 45, 0.05);
+  box-shadow: 0 0 15px rgba(255, 45, 45, 0.3);
+}
+
+.cardTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.cardSubtitle {
+  font-size: 0.875rem;
+  color: #888888;
+}
+
+.card:first-child .cardTitle {
+  color: #7B2FFF;
+}
+
+.card:last-child .cardTitle {
+  color: #0066FF;
+}
+
+.inputGroup {
+  margin-bottom: 32px;
+}
+
+.label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  background-color: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  padding: 0 16px;
+  transition: border-color 0.2s ease;
+}
+
+.inputWrapper:focus-within {
+  border-color: #FF2D2D;
+}
+
+.input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 1.25rem;
+  padding: 16px 0;
+  outline: none;
+}
+
+.input::placeholder {
+  color: #555555;
+  font-size: 1rem;
+}
+
+.currency {
+  font-weight: 700;
+  color: #888888;
+}
+
+.validationError {
+  color: #FF4444;
+  font-size: 0.875rem;
+  margin-top: 8px;
+}
+
+.payout {
+  margin-top: 12px;
+  font-size: 0.875rem;
+  color: #888888;
+}
+
+.winAmount {
+  color: #00C851;
+  font-weight: 700;
+}
+
+.placeBetBtn {
+  width: 100%;
+  background-color: #FF2D2D;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 16px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.placeBetBtn:hover:not(:disabled) {
+  background-color: #e62828;
+  box-shadow: 0 0 15px rgba(255, 45, 45, 0.3);
+}
+
+.placeBetBtn:disabled {
+  background-color: #2a2a2a;
+  color: #555555;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.errorMessage {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: rgba(255, 68, 68, 0.1);
+  border: 1px solid #FF4444;
+  border-radius: 4px;
+  color: #FF4444;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.successMessage {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: rgba(0, 200, 81, 0.1);
+  border: 1px solid #00C851;
+  border-radius: 4px;
+  color: #00C851;
+  text-align: center;
+}
+
+.txLink {
+  display: inline-block;
+  margin-top: 8px;
+  color: #ffffff;
+  text-decoration: underline;
+  font-size: 0.875rem;
+}
+
+.txLink:hover {
+  color: #00C851;
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 16px;
+  }
+  .cards {
+    flex-direction: column;
+  }
+}

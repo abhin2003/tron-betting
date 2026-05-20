@@ -1,0 +1,139 @@
+.container {
+  margin: 48px auto;
+  max-width: 1000px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 32px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 24px;
+  color: #ffffff;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  padding: 16px;
+  color: #888888;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-bottom: 1px solid #2a2a2a;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 16px;
+  font-size: 0.875rem;
+  color: #ffffff;
+  border-bottom: 1px solid #2a2a2a;
+  white-space: nowrap;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover:not(.skeletonRow) {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.timeText {
+  color: #888888;
+}
+
+.playerText {
+  font-family: monospace;
+  color: #cccccc;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badgePurple {
+  background-color: rgba(123, 47, 255, 0.2);
+  color: #7B2FFF;
+  border: 1px solid #7B2FFF;
+}
+
+.badgeBlue {
+  background-color: rgba(0, 102, 255, 0.2);
+  color: #0066FF;
+  border: 1px solid #0066FF;
+}
+
+.badgeGreen {
+  background-color: rgba(0, 200, 81, 0.1);
+  color: #00C851;
+  border: 1px solid #00C851;
+}
+
+.badgeRed {
+  background-color: rgba(255, 68, 68, 0.1);
+  color: #FF4444;
+  border: 1px solid #FF4444;
+}
+
+.badgeYellow {
+  background-color: rgba(255, 179, 0, 0.1);
+  color: #FFB300;
+  border: 1px solid #FFB300;
+}
+
+.winAmount {
+  color: #00C851 !important;
+  font-weight: 700;
+}
+
+.emptyState, .errorState {
+  text-align: center;
+  padding: 32px !important;
+  color: #888888;
+}
+
+.errorState {
+  color: #FF4444;
+  background-color: rgba(255, 68, 68, 0.05);
+  border-radius: 8px;
+}
+
+/* Skeleton loader */
+.skeletonRow td {
+  padding: 16px;
+}
+
+.skeletonBox {
+  height: 20px;
+  background-color: #2a2a2a;
+  border-radius: 4px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+    margin: 24px auto;
+  }
+}
