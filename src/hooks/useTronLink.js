@@ -1,13 +1,45 @@
 import { useState, useEffect, useCallback } from 'react';
-import { TRON_NETWORK } from '../constants/config';
 
+/**
+ * Custom React Hook for integrating with TronLink wallet.
+ * 
+ * Provides state and functions to manage the wallet connection,
+ * retrieve the user's address and TRX balance, and handle errors.
+ */
 export const useTronLink = () => {
   const [walletAddress, setWalletAddress] = useState(null);
+  const [balance, setBalance] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [networkType, setNetworkType] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [networkType, setNetworkType] = useState(null); // Used by Navbar for warning banner
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  /**
+   * Fetches the TRX balance of the connected account.
+   * Converts the balance from Sun to TRX (1 TRX = 1,000,000 Sun).
+   */
+  const fetchBalanceAndLogInfo = async (address) => {
+    try {
+      // Fetch the balance in Sun using the window.tronWeb instance
+      const balanceInSun = await window.tronWeb.trx.getBalance(address);
+      // Convert Sun to TRX
+      const balanceInTrx = window.tronWeb.fromSun(balanceInSun);
+      
+      setBalance(balanceInTrx);
+
+      // Display exactly in the format requested by the user
+      console.log(`Connected Wallet:\n${address}\n\nBalance:\n${balanceInTrx} TRX`);
+    } catch (err) {
+      console.error("Failed to fetch balance:", err);
+      setError("Failed to fetch account balance.");
+    }
+  };
+
+  /**
+   * Initializes the TronWeb connection if TronLink is available and ready.
+   * Retrieves the current selected address, updates the connection state,
+   * and fetches the wallet balance.
+   */
   const initTronWeb = useCallback(async () => {
     if (window.tronWeb && window.tronWeb.ready) {
       try {
@@ -16,21 +48,23 @@ export const useTronLink = () => {
           setWalletAddress(address);
           setIsConnected(true);
           setError(null);
+          
+          // Detect network type
+          const node = window.tronWeb.fullNode.host || "";
+          let network = 'unknown';
+          if (node.includes('api.trongrid.io')) network = 'mainnet';
+          else if (node.includes('api.shasta.trongrid.io')) network = 'shasta';
+          else if (node.includes('nile')) network = 'nile';
+          setNetworkType(network);
+
+          // Fetch and log balance
+          await fetchBalanceAndLogInfo(address);
         } else {
           setIsConnected(false);
         }
-        
-        // Detect network
-        const node = window.tronWeb.fullNode.host;
-        let network = 'unknown';
-        if (node.includes('api.trongrid.io')) network = 'mainnet';
-        else if (node.includes('api.shasta.trongrid.io')) network = 'shasta';
-        else if (node.includes('nile')) network = 'nile';
-        
-        setNetworkType(network);
       } catch (err) {
         console.error("Error initializing TronWeb", err);
-        setError("Error connecting to TronLink");
+        setError("Error parsing wallet data from TronLink.");
       }
     } else {
       setIsConnected(false);
@@ -39,92 +73,108 @@ export const useTronLink = () => {
     setIsLoading(false);
   }, []);
 
-  useEffect(() => {
-    let timeout;
-    
-    const checkTronLink = () => {
-      if (window.tronWeb) {
-        initTronWeb();
-      } else {
-        setError("Please install TronLink wallet");
-        setIsLoading(false);
-      }
-    };
-
-    // Wait up to 3 seconds for TronLink to inject
-    if (!window.tronWeb) {
-      let attempts = 0;
-      const interval = setInterval(() => {
-        attempts++;
-        if (window.tronWeb || attempts >= 6) { // 6 * 500ms = 3s
-          clearInterval(interval);
-          checkTronLink();
-        }
-      }, 500);
-      timeout = setTimeout(() => {
-        clearInterval(interval);
-        if (isLoading) {
-          checkTronLink();
-        }
-      }, 3000);
-    } else {
-      checkTronLink();
+  /**
+   * Handles user click to Connect wallet.
+   * Requests account access from the TronLink extension.
+   */
+  const connectWallet = async (providedRequestPromise = null) => {
+    // 1. Detect whether TronLink is installed
+    if (!window.tronWeb && !window.tronLink) {
+      setError("TronLink is not installed. Please install the TronLink browser extension to proceed.");
+      return { success: false, code: 400 }; // Not installed
     }
 
+    // FIRE IMMEDIATELY before any React state updates to preserve the browser's "user gesture" 
+    // context. This is strictly required for the TronLink popup to successfully open when locked.
+    const requestPromise = providedRequestPromise || window.tronLink.request({ method: 'tron_requestAccounts' });
+
+    setIsLoading(true);
+    setError(null);
+
+    let res;
+    try {
+      res = await requestPromise;
+    } catch (err) {
+      console.error("Wallet connection error:", err);
+      res = { code: 500, error: err };
+    }
+      
+    // Res.code 200 means user approved the connection
+    if (res.code === 200) {
+      // 4 & 5. Initialize, get wallet address, fetch balance, display in console.
+      await initTronWeb();
+      return { success: true, code: 200 };
+    } else if (res.code === 4000) {
+      setError("TronLink wallet is locked. Please open the extension and unlock it.");
+      setIsLoading(false);
+      return { success: false, code: 4000 };
+    } else if (res.code === 4001) {
+      setError("Connection request was rejected by the user.");
+      setIsLoading(false);
+      return { success: false, code: 4001 };
+    } else {
+      // Fallback for any other code
+      setError(`Connection failed. Code: ${res.code || 'Unknown'}`);
+      setIsLoading(false);
+      return { success: false, code: res.code || 500 };
+    }
+  };
+
+  /**
+   * Auto-detection and message listener for account / network changes.
+   */
+  useEffect(() => {
     const handleMessage = (e) => {
-      if (e.data.message && e.data.message.action == "setAccount") {
+      // If user switches accounts in TronLink
+      if (e.data.message && e.data.message.action === "setAccount") {
         const address = e.data.message.data.address;
         if (address) {
           setWalletAddress(address);
           setIsConnected(true);
           setError(null);
+          fetchBalanceAndLogInfo(address);
         } else {
           setWalletAddress(null);
           setIsConnected(false);
         }
       }
       
-      if (e.data.message && e.data.message.action == "setNode") {
+      // If user switches nodes/networks in TronLink
+      if (e.data.message && e.data.message.action === "setNode") {
         initTronWeb();
       }
     };
 
     window.addEventListener('message', handleMessage);
 
+    // Initial check to see if it's already logged in and ready
+    if (window.tronWeb && window.tronWeb.ready) {
+      initTronWeb();
+    }
+
     return () => {
-      if (timeout) clearTimeout(timeout);
       window.removeEventListener('message', handleMessage);
     };
-  }, [initTronWeb, isLoading]);
+  }, [initTronWeb]);
 
-  const connectWallet = async () => {
-    try {
-      if (!window.tronWeb) {
-        setError("Please install TronLink wallet");
-        return;
-      }
-      
-      setIsLoading(true);
-      // Trigger TronLink login popup
-      const res = await window.tronLink.request({ method: 'tron_requestAccounts' });
-      if (res.code === 200) {
-        await initTronWeb();
-      } else {
-        setError("User rejected connection");
-        setIsLoading(false);
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Failed to connect wallet");
-      setIsLoading(false);
-    }
-  };
+  /**
+   * Disconnects the wallet from the UI state.
+   */
+  const disconnectWallet = useCallback(() => {
+    setWalletAddress(null);
+    setBalance(null);
+    setIsConnected(false);
+    setNetworkType(null);
+    setError(null);
+  }, []);
 
   return {
     walletAddress,
+    balance,
     isConnected,
     networkType,
     connectWallet,
+    disconnectWallet,
     isLoading,
     error
   };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useTronLink } from '../../hooks/useTronLink';
+import { useWallet } from '../../context/WalletContext';
+import { useWalletModal } from '../../context/WalletModalContext';
 import { 
   ODD_WALLET_ADDRESS, 
   EVEN_WALLET_ADDRESS, 
@@ -10,7 +11,8 @@ import {
 import styles from './BetForm.module.css';
 
 const BetForm = () => {
-  const { isConnected, connectWallet } = useTronLink();
+  const { isConnected } = useWallet();
+  const { openModal } = useWalletModal();
   const [prediction, setPrediction] = useState(null); // 'ODD' or 'EVEN'
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -95,7 +97,7 @@ const BetForm = () => {
 
       <button 
         className={styles.placeBetBtn}
-        onClick={!isConnected ? connectWallet : handleBet}
+        onClick={!isConnected ? openModal : handleBet}
         disabled={isConnected && (!prediction || !isValidAmount || isLoading)}
       >
         {!isConnected ? 'Connect Wallet First' : 

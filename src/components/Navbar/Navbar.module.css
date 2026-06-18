@@ -18,6 +18,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  position: relative;
 }
 
 .errorText {
@@ -47,13 +48,12 @@
   transition: all 0.2s ease;
 }
 
-.connectBtn:hover:not(.connected) {
+.connectBtn:hover {
   border-color: #FF2D2D;
   background-color: rgba(255, 45, 45, 0.1);
 }
 
 .connectBtn.connected {
-  cursor: default;
   background-color: #141414;
 }
 
@@ -82,6 +82,109 @@
   font-weight: 500;
 }
 
+/* Dropdown Styles */
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 10px;
+  width: 320px;
+  background-color: #32333b;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #fff;
+  border: 1px solid #3b3c45;
+}
+
+.dropdownTop {
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+}
+
+.walletAvatar {
+  width: 48px;
+  height: 48px;
+  background-color: #fff;
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.walletAvatarIcon {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background-color: #1B56F4;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #32333b;
+}
+
+.walletInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.addressRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.iconBtn {
+  background: transparent;
+  border: none;
+  color: #a0a2ad;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.iconBtn:hover {
+  color: #fff;
+}
+
+.actionRow {
+  display: flex;
+  gap: 10px;
+}
+
+.actionBtn {
+  background-color: #4a4b57;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex: 1;
+}
+
+.actionBtn:hover {
+  background-color: #585966;
+}
+
 @media (max-width: 480px) {
   .navbar {
     padding: 12px 16px;
@@ -91,5 +194,17 @@
   }
   .connectBtn {
     padding: 6px 12px;
+  }
+  .dropdownMenu {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    border-radius: 16px 16px 0 0;
+    border: none;
+    border-top: 1px solid #3b3c45;
   }
 }

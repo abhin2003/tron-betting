@@ -4,7 +4,9 @@ import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import Home from './pages/Home/Home';
 import ErrorBoundary from './components/ErrorBoundary';
-import { useTronLink } from './hooks/useTronLink';
+import { WalletProvider, useWallet } from './context/WalletContext';
+import { WalletModalProvider } from './context/WalletModalContext';
+import WalletModal from './components/WalletModal/WalletModal';
 import './index.css';
 
 const LoadingScreen = () => (
@@ -15,7 +17,7 @@ const LoadingScreen = () => (
 );
 
 const AppContent = () => {
-  const { isLoading } = useTronLink();
+  const { isLoading } = useWallet();
 
   useEffect(() => {
     document.title = 'TRON BET — Odd/Even Betting';
@@ -28,6 +30,7 @@ const AppContent = () => {
   return (
     <>
       <Navbar />
+      <WalletModal />
       <Routes>
         <Route path="/" element={<Home />} />
       </Routes>
@@ -39,9 +42,13 @@ const AppContent = () => {
 const App = () => {
   return (
     <ErrorBoundary>
-      <Router>
-        <AppContent />
-      </Router>
+      <WalletProvider>
+        <WalletModalProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </WalletModalProvider>
+      </WalletProvider>
     </ErrorBoundary>
   );
 };
