@@ -14,24 +14,51 @@ const StatsBar = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/stats`);
-        if (response.data) {
-          setStats({
-            totalBets: response.data.totalBets || '0',
-            totalWagered: response.data.totalWagered ? Number(response.data.totalWagered).toFixed(2) : '0.00',
-            biggestWin: response.data.biggestWin ? Number(response.data.biggestWin).toFixed(2) : '0.00',
-            contractBalance: response.data.contractBalance ? Number(response.data.contractBalance).toFixed(2) : '0.00'
-          });
+        const savedBetsStr = localStorage.getItem('tronFlipBets');
+        let totalBets = 0;
+        let totalWagered = 0;
+        let biggestWin = 0;
+        
+        if (savedBetsStr) {
+            const bets = JSON.parse(savedBetsStr);
+            totalBets = bets.length;
+            totalWagered = bets.reduce((sum, bet) => sum + (Number(bet.amount) || 0), 0);
+            biggestWin = bets.reduce((max, bet) => {
+                const payout = Number(bet.payout) || 0;
+                return payout > max ? payout : max;
+            }, 0);
         }
+        
+        let contractBal = 0;
+        if (window.tronWeb && import.meta.env.VITE_MAIN_ADDRESS) {
+            const balanceInSun = await window.tronWeb.trx.getBalance(import.meta.env.VITE_MAIN_ADDRESS);
+            contractBal = window.tronWeb.fromSun(balanceInSun);
+        }
+
+        setStats({
+          totalBets: totalBets.toString(),
+          totalWagered: totalWagered.toFixed(2),
+          biggestWin: biggestWin.toFixed(2),
+          contractBalance: Number(contractBal).toFixed(2)
+        });
       } catch (err) {
-        console.error("Failed to fetch stats", err);
+        console.error("Failed to calculate stats", err);
       }
     };
 
     fetchStats();
-    const interval = setInterval(fetchStats, 30000); // 30 seconds
+    
+    const handleUpdate = () => {
+        fetchStats();
+    };
+    
+    window.addEventListener('local-bets-updated', handleUpdate);
+    const interval = setInterval(fetchStats, 15000);
 
-    return () => clearInterval(interval);
+    return () => {
+        clearInterval(interval);
+        window.removeEventListener('local-bets-updated', handleUpdate);
+    };
   }, []);
 
   return (

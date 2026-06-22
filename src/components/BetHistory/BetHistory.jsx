@@ -14,28 +14,21 @@ const BetHistory = () => {
   const prevBetsRef = useRef([]);
 
   useEffect(() => {
-    const fetchBets = async () => {
+    const fetchBets = () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/bets`);
-        if (response.data && Array.isArray(response.data)) {
-          // Take first 20 bets
-          const newBets = response.data.slice(0, 20);
+        const savedBetsStr = localStorage.getItem('tronFlipBets');
+        if (savedBetsStr) {
+          const newBets = JSON.parse(savedBetsStr);
           
-          // Check for resolved bets to trigger animations
-          if (walletAddress && prevBetsRef.current.length > 0) {
-            const myLatestBet = newBets.find(b => b.player === walletAddress);
-            const myPrevLatestBet = prevBetsRef.current.find(b => b.player === walletAddress);
+          if (walletAddress && prevBetsRef.current.length > 0 && newBets.length > 0) {
+            const myLatestBet = newBets[0];
+            const myPrevLatestBet = prevBetsRef.current[0];
             
-            if (myLatestBet && myPrevLatestBet) {
-               const wasPending = !myPrevLatestBet.result || myPrevLatestBet.result.toUpperCase() === 'PENDING';
-               const isResolved = myLatestBet.result && myLatestBet.result.toUpperCase() !== 'PENDING';
-               
-               if (wasPending && isResolved) {
-                 if (myLatestBet.result.toUpperCase() === 'WIN') {
-                    window.dispatchEvent(new CustomEvent('mascot-reaction', { detail: 'win' }));
-                 } else if (myLatestBet.result.toUpperCase() === 'LOSE') {
-                    window.dispatchEvent(new CustomEvent('mascot-reaction', { detail: 'loss' }));
-                 }
+            if (myLatestBet.id !== myPrevLatestBet.id) {
+               if (myLatestBet.result === 'WIN') {
+                  window.dispatchEvent(new CustomEvent('mascot-reaction', { detail: 'win' }));
+               } else if (myLatestBet.result === 'LOSE') {
+                  window.dispatchEvent(new CustomEvent('mascot-reaction', { detail: 'loss' }));
                }
             }
           }
@@ -43,23 +36,27 @@ const BetHistory = () => {
           prevBetsRef.current = newBets;
           setBets(newBets);
         } else {
-          // Fallback if data format is unexpected
           setBets([]);
         }
-        setError(null);
       } catch (err) {
-        console.error("Failed to fetch bet history", err);
-        setError("Unable to load recent bets");
+        console.error("Failed to read local bets", err);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchBets();
-    const interval = setInterval(fetchBets, 15000); // 15 seconds
+    
+    const handleUpdate = () => {
+        fetchBets();
+    };
+    
+    window.addEventListener('local-bets-updated', handleUpdate);
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      window.removeEventListener('local-bets-updated', handleUpdate);
+    };
+  }, [walletAddress]);
 
   const getPredictionBadge = (prediction) => {
     return <span className={`${styles.badge} ${prediction === 'ODD' ? styles.badgePurple : styles.badgeBlue}`}>{prediction}</span>;
