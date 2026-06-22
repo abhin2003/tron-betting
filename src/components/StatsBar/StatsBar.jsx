@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../constants/config';
 import styles from './StatsBar.module.css';
+import { supabase } from '../../utils/supabaseClient';
 
 const StatsBar = () => {
   const [stats, setStats] = useState({
@@ -14,16 +15,18 @@ const StatsBar = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const savedBetsStr = localStorage.getItem('tronFlipBets');
+        const { data, error } = await supabase
+          .from('bets')
+          .select('amount, payout');
+          
         let totalBets = 0;
         let totalWagered = 0;
         let biggestWin = 0;
         
-        if (savedBetsStr) {
-            const bets = JSON.parse(savedBetsStr);
-            totalBets = bets.length;
-            totalWagered = bets.reduce((sum, bet) => sum + (Number(bet.amount) || 0), 0);
-            biggestWin = bets.reduce((max, bet) => {
+        if (!error && data) {
+            totalBets = data.length;
+            totalWagered = data.reduce((sum, bet) => sum + (Number(bet.amount) || 0), 0);
+            biggestWin = data.reduce((max, bet) => {
                 const payout = Number(bet.payout) || 0;
                 return payout > max ? payout : max;
             }, 0);
@@ -52,12 +55,12 @@ const StatsBar = () => {
         fetchStats();
     };
     
-    window.addEventListener('local-bets-updated', handleUpdate);
+    window.addEventListener('supabase-bets-updated', handleUpdate);
     const interval = setInterval(fetchStats, 15000);
 
     return () => {
         clearInterval(interval);
-        window.removeEventListener('local-bets-updated', handleUpdate);
+        window.removeEventListener('supabase-bets-updated', handleUpdate);
     };
   }, []);
 

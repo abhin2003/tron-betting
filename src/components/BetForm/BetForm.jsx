@@ -5,6 +5,7 @@ import { MIN_BET_TRX, MAX_BET_TRX, waitForConfirmation, validateTransaction, jud
 import styles from './BetForm.module.css';
 
 import ResultPopup from '../ResultPopup/ResultPopup';
+import { supabase } from '../../utils/supabaseClient';
 
 const BetForm = () => {
   const { isConnected, walletAddress } = useWallet();
@@ -119,25 +120,31 @@ const BetForm = () => {
           setShowPopup(true);
       }
 
-      // Save to local history
+      // Save to Supabase
       try {
-        const savedBets = JSON.parse(localStorage.getItem('tronFlipBets') || '[]');
-        const newBet = {
-          id: betTxId,
-          player: walletAddress,
-          prediction: prediction,
-          amount: numAmount,
-          asset: asset,
-          block: blockNumber,
-          result: isWin ? 'WIN' : 'LOSE',
-          payout: finalPayout,
-          timestamp: Date.now()
-        };
-        savedBets.unshift(newBet);
-        localStorage.setItem('tronFlipBets', JSON.stringify(savedBets.slice(0, 50))); // Keep last 50
-        window.dispatchEvent(new Event('local-bets-updated'));
-      } catch (storageErr) {
-        console.error("Failed to save bet locally", storageErr);
+        const { error: insertError } = await supabase
+          .from('bets')
+          .insert([
+            {
+              id: betTxId,
+              player: walletAddress,
+              prediction: prediction,
+              amount: numAmount,
+              asset: asset,
+              block: blockNumber,
+              result: isWin ? 'WIN' : 'LOSE',
+              payout: finalPayout,
+            }
+          ]);
+          
+        if (insertError) {
+          console.error("Failed to save bet to Supabase", insertError);
+        } else {
+          // Tell BetHistory component to refresh
+          window.dispatchEvent(new Event('supabase-bets-updated'));
+        }
+      } catch (dbErr) {
+        console.error("Database error:", dbErr);
       }
 
     } catch (err) {

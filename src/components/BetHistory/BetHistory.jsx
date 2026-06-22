@@ -5,6 +5,7 @@ import { shortenAddress } from '../../utils/format';
 import { formatRelativeTime } from '../../utils/time';
 import { useWallet } from '../../context/WalletContext';
 import styles from './BetHistory.module.css';
+import { supabase } from '../../utils/supabaseClient';
 
 const BetHistory = () => {
   const [bets, setBets] = useState([]);
@@ -14,17 +15,22 @@ const BetHistory = () => {
   const prevBetsRef = useRef([]);
 
   useEffect(() => {
-    const fetchBets = () => {
+    const fetchBets = async () => {
       try {
-        const savedBetsStr = localStorage.getItem('tronFlipBets');
-        if (savedBetsStr) {
-          const newBets = JSON.parse(savedBetsStr);
-          
-          if (walletAddress && prevBetsRef.current.length > 0 && newBets.length > 0) {
-            const myLatestBet = newBets[0];
-            const myPrevLatestBet = prevBetsRef.current[0];
+        const { data, error } = await supabase
+          .from('bets')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (error) throw error;
+        
+        if (data) {
+          if (walletAddress && prevBetsRef.current.length > 0 && data.length > 0) {
+            const myLatestBet = data.find(b => b.player === walletAddress);
+            const myPrevLatestBet = prevBetsRef.current.find(b => b.player === walletAddress);
             
-            if (myLatestBet.id !== myPrevLatestBet.id) {
+            if (myLatestBet && (!myPrevLatestBet || myLatestBet.id !== myPrevLatestBet.id)) {
                if (myLatestBet.result === 'WIN') {
                   window.dispatchEvent(new CustomEvent('mascot-reaction', { detail: 'win' }));
                } else if (myLatestBet.result === 'LOSE') {
@@ -33,13 +39,11 @@ const BetHistory = () => {
             }
           }
           
-          prevBetsRef.current = newBets;
-          setBets(newBets);
-        } else {
-          setBets([]);
+          prevBetsRef.current = data;
+          setBets(data);
         }
       } catch (err) {
-        console.error("Failed to read local bets", err);
+        console.error("Failed to fetch bets from Supabase", err);
       } finally {
         setIsLoading(false);
       }
@@ -47,14 +51,27 @@ const BetHistory = () => {
 
     fetchBets();
     
+    // Subscribe to real-time inserts
+    const subscription = supabase
+      .channel('public:bets')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bets' }, payload => {
+        setBets(current => {
+          const updated = [payload.new, ...current].slice(0, 20);
+          prevBetsRef.current = updated;
+          return updated;
+        });
+      })
+      .subscribe();
+      
+    // Fallback manual refresh from the BetForm component
     const handleUpdate = () => {
         fetchBets();
     };
-    
-    window.addEventListener('local-bets-updated', handleUpdate);
+    window.addEventListener('supabase-bets-updated', handleUpdate);
 
     return () => {
-      window.removeEventListener('local-bets-updated', handleUpdate);
+      supabase.removeChannel(subscription);
+      window.removeEventListener('supabase-bets-updated', handleUpdate);
     };
   }, [walletAddress]);
 
