@@ -35,7 +35,7 @@ const Footer = () => {
         </div>
         
         <div className={styles.copyright}>
-          © 2024 TRON BET
+          © 2024 TronFlip
         </div>
       </div>
     </footer>
