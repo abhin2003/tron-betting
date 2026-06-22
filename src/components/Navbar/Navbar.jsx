@@ -43,7 +43,7 @@ const Navbar = () => {
       )}
       <nav className={styles.navbar}>
         <div className={styles.logo}>
-          TRON BET
+          <span className={styles.logoHighlight}>Tron</span>Flip
         </div>
         <div className={styles.walletSection} ref={dropdownRef}>
           {error && !isConnected && <span className={styles.errorText}>{error}</span>}
@@ -51,7 +51,13 @@ const Navbar = () => {
             className={`${styles.connectBtn} ${isConnected ? styles.connected : ''}`}
             onClick={isConnected ? () => setIsDropdownOpen(!isDropdownOpen) : openModal}
           >
-            <span className={`${styles.dot} ${isConnected ? styles.dotGreen : styles.dotRed}`}></span>
+            {isConnected ? (
+              <span className={`${styles.dot} ${styles.dotGreen}`}></span>
+            ) : (
+              <svg className={styles.tronIcon} viewBox="0 0 422.39 527.76" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M422.39 96.67L194.27 0v274.6L422.39 96.67zM228.12 527.76l194.27-431.09L228.12 274.6v253.16zM0 96.67l228.12-96.67v274.6L0 96.67zM194.27 527.76V274.6L0 96.67l194.27 431.09z"/>
+              </svg>
+            )}
             {isConnected ? shortenAddress(walletAddress) : 'Connect Wallet'}
           </button>
 

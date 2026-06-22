@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../constants/config';
 import { shortenAddress } from '../../utils/format';
 import { formatRelativeTime } from '../../utils/time';
+import { useWallet } from '../../context/WalletContext';
 import styles from './BetHistory.module.css';
 
 const BetHistory = () => {
   const [bets, setBets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { walletAddress } = useWallet();
+  const prevBetsRef = useRef([]);
 
   useEffect(() => {
     const fetchBets = async () => {
@@ -16,7 +19,29 @@ const BetHistory = () => {
         const response = await axios.get(`${API_BASE_URL}/bets`);
         if (response.data && Array.isArray(response.data)) {
           // Take first 20 bets
-          setBets(response.data.slice(0, 20));
+          const newBets = response.data.slice(0, 20);
+          
+          // Check for resolved bets to trigger animations
+          if (walletAddress && prevBetsRef.current.length > 0) {
+            const myLatestBet = newBets.find(b => b.player === walletAddress);
+            const myPrevLatestBet = prevBetsRef.current.find(b => b.player === walletAddress);
+            
+            if (myLatestBet && myPrevLatestBet) {
+               const wasPending = !myPrevLatestBet.result || myPrevLatestBet.result.toUpperCase() === 'PENDING';
+               const isResolved = myLatestBet.result && myLatestBet.result.toUpperCase() !== 'PENDING';
+               
+               if (wasPending && isResolved) {
+                 if (myLatestBet.result.toUpperCase() === 'WIN') {
+                    window.dispatchEvent(new CustomEvent('mascot-reaction', { detail: 'win' }));
+                 } else if (myLatestBet.result.toUpperCase() === 'LOSE') {
+                    window.dispatchEvent(new CustomEvent('mascot-reaction', { detail: 'loss' }));
+                 }
+               }
+            }
+          }
+          
+          prevBetsRef.current = newBets;
+          setBets(newBets);
         } else {
           // Fallback if data format is unexpected
           setBets([]);

@@ -38,6 +38,7 @@ const BetForm = () => {
       
       if (transaction && transaction.result) {
         setTxHash(transaction.txid);
+        window.dispatchEvent(new CustomEvent('mascot-reaction', { detail: 'sent' }));
       } else {
         setError('Transaction failed or rejected by user.');
       }
@@ -53,7 +54,7 @@ const BetForm = () => {
     <div className={styles.container}>
       <div className={styles.cards}>
         <div 
-          className={`${styles.card} ${prediction === 'ODD' ? styles.selected : ''}`}
+          className={`${styles.card} ${styles.cardOdd} ${prediction === 'ODD' ? styles.selected : ''}`}
           onClick={() => setPrediction('ODD')}
         >
           <div className={styles.cardTitle}>ODD</div>
@@ -61,7 +62,7 @@ const BetForm = () => {
         </div>
         
         <div 
-          className={`${styles.card} ${prediction === 'EVEN' ? styles.selected : ''}`}
+          className={`${styles.card} ${styles.cardEven} ${prediction === 'EVEN' ? styles.selected : ''}`}
           onClick={() => setPrediction('EVEN')}
         >
           <div className={styles.cardTitle}>EVEN</div>
@@ -72,6 +73,9 @@ const BetForm = () => {
       <div className={styles.inputGroup}>
         <label className={styles.label}>Bet Amount (TRX)</label>
         <div className={styles.inputWrapper}>
+          <svg className={styles.inputIcon} viewBox="0 0 422.39 527.76" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M422.39 96.67L194.27 0v274.6L422.39 96.67zM228.12 527.76l194.27-431.09L228.12 274.6v253.16zM0 96.67l228.12-96.67v274.6L0 96.67zM194.27 527.76V274.6L0 96.67l194.27 431.09z"/>
+          </svg>
           <input 
             type="number" 
             className={styles.input}

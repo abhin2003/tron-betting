@@ -3,15 +3,28 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  background-color: #0d0d0d;
-  border-bottom: 1px solid #2a2a2a;
+  background: rgba(5, 5, 5, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .logo {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #FF2D2D;
-  letter-spacing: 1px;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.logoHighlight {
+  color: var(--primary-red);
+  text-shadow: var(--border-glow);
 }
 
 .walletSection {
@@ -37,24 +50,55 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #1a1a1a;
+  background: linear-gradient(135deg, var(--primary-red) 0%, var(--dark-red) 100%);
   color: #ffffff;
-  border: 1px solid #2a2a2a;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  border: 1px solid var(--accent);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 6, 6, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.connectBtn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: all 0.5s ease;
+}
+
+.connectBtn:hover::after {
+  left: 100%;
 }
 
 .connectBtn:hover {
-  border-color: #FF2D2D;
-  background-color: rgba(255, 45, 45, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 6, 6, 0.4);
 }
 
 .connectBtn.connected {
-  background-color: #141414;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: none;
+}
+
+.connectBtn.connected:hover {
+  border-color: var(--primary-red);
+  box-shadow: var(--border-glow);
+}
+
+.tronIcon {
+  width: 16px;
+  height: 16px;
+  fill: #ffffff;
 }
 
 .dot {
@@ -79,25 +123,25 @@
   text-align: center;
   padding: 8px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 /* Dropdown Styles */
 .dropdownMenu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 12px);
   right: 0;
-  margin-top: 10px;
   width: 320px;
-  background-color: #32333b;
+  background: rgba(15, 15, 15, 0.95);
+  backdrop-filter: blur(16px);
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
   z-index: 1000;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   color: #fff;
-  border: 1px solid #3b3c45;
+  border: 1px solid var(--border-color);
 }
 
 .dropdownTop {
@@ -109,12 +153,13 @@
 .walletAvatar {
   width: 48px;
   height: 48px;
-  background-color: #fff;
+  background-color: var(--bg-main);
   border-radius: 12px;
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
+  border: 1px solid var(--border-color);
 }
 
 .walletAvatarIcon {
@@ -123,12 +168,12 @@
   position: absolute;
   bottom: -4px;
   right: -4px;
-  background-color: #1B56F4;
+  background-color: var(--primary-red);
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 2px solid #32333b;
+  border: 2px solid #0f0f0f;
 }
 
 .walletInfo {
@@ -150,7 +195,7 @@
 .iconBtn {
   background: transparent;
   border: none;
-  color: #a0a2ad;
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 0;
   display: flex;
@@ -160,7 +205,7 @@
 }
 
 .iconBtn:hover {
-  color: #fff;
+  color: var(--primary-red);
 }
 
 .actionRow {
@@ -169,20 +214,21 @@
 }
 
 .actionBtn {
-  background-color: #4a4b57;
-  color: #fff;
-  border: none;
+  background-color: rgba(255, 6, 6, 0.1);
+  color: var(--primary-red);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 6px 16px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   flex: 1;
 }
 
 .actionBtn:hover {
-  background-color: #585966;
+  background-color: var(--primary-red);
+  color: #fff;
 }
 
 @media (max-width: 480px) {
@@ -190,10 +236,11 @@
     padding: 12px 16px;
   }
   .logo {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
   }
   .connectBtn {
-    padding: 6px 12px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
   }
   .dropdownMenu {
     position: fixed;
@@ -205,6 +252,6 @@
     margin: 0;
     border-radius: 16px 16px 0 0;
     border: none;
-    border-top: 1px solid #3b3c45;
+    border-top: 1px solid var(--border-color);
   }
 }

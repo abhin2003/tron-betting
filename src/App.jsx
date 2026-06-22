@@ -7,6 +7,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { WalletProvider, useWallet } from './context/WalletContext';
 import { WalletModalProvider } from './context/WalletModalContext';
 import WalletModal from './components/WalletModal/WalletModal';
+import MascotReaction from './components/MascotReaction/MascotReaction';
 import './index.css';
 
 const LoadingScreen = () => (
@@ -31,6 +32,7 @@ const AppContent = () => {
     <>
       <Navbar />
       <WalletModal />
+      <MascotReaction />
       <Routes>
         <Route path="/" element={<Home />} />
       </Routes>

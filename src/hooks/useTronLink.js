@@ -103,6 +103,7 @@ export const useTronLink = () => {
     if (res.code === 200) {
       // 4 & 5. Initialize, get wallet address, fetch balance, display in console.
       await initTronWeb();
+      window.dispatchEvent(new CustomEvent('mascot-reaction', { detail: 'connected' }));
       return { success: true, code: 200 };
     } else if (res.code === 4000) {
       setError("TronLink wallet is locked. Please open the extension and unlock it.");
